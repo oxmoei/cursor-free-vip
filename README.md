@@ -33,8 +33,6 @@
 - ![macOS](https://img.shields.io/badge/-macOS-000000?logo=apple&logoColor=white)
 - ![Linux](https://img.shields.io/badge/-Linux-FCC624?logo=linux&logoColor=black)
 
-> ⚡ **建议以管理员身份运行，并保持最新版本以获得最佳体验。**
-
 ---
 
 ## 🚀 **快速开始**
