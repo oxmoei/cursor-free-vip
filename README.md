@@ -65,7 +65,7 @@
 <summary><b>Linux / WSL / macOS 系统</b></summary>（必须已安装 git）
 
 ```bash
-git clone https://github.com/blockchain-src/cursor-free-vip.git && cd cursor-free-vip && chmod +x install.sh && ./install.sh
+git clone https://github.com/oxmoei/cursor-free-vip.git && cd cursor-free-vip && chmod +x install.sh && ./install.sh
 ```
 </details>
 
