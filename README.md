@@ -34,7 +34,7 @@
 ### 根据系统环境下载并运行脚本
 
 <details open>
-<summary><b>Linux / WSL / macOS 系统</b></summary>（必须已安装 git，➡️<a href="./安装git教程.md">安装git教程</a>）
+<summary><b>Linux / WSL / macOS 系统</b></summary>（必须已安装 git，如未安装请参考➡️<a href="./安装git教程.md">安装git教程</a>）
 
 ```bash
 git clone https://github.com/oxmoei/cursor-free-vip.git && cd cursor-free-vip && chmod +x install.sh && ./install.sh
@@ -42,7 +42,7 @@ git clone https://github.com/oxmoei/cursor-free-vip.git && cd cursor-free-vip &&
 </details>
 
 <details open>
-<summary><b>Windows 系统</b></summary>（必须已安装 git，➡️<a href="./安装git教程.md">安装git教程</a>）
+<summary><b>Windows 系统</b></summary>（必须已安装 git，如未安装请参考➡️<a href="./安装git教程.md">安装git教程</a>）
 
 > ⚠️ **请以管理员身份启动 PowerShell，依次执行以下命令：**
 
