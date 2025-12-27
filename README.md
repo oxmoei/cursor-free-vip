@@ -1,31 +1,5 @@
 # ✨ **Cursor Free VIP 教程**
-
-<div align="center">
-  <img src="https://github.com/yeongpin/cursor-free-vip/blob/main/images/logo.png" alt="Cursor Pro Logo" width="180" style="border-radius: 8px; margin-bottom: 10px;"/>
-</div>
-
-<p align="center">
-  <a href="https://github.com/yeongpin/cursor-free-vip/releases/latest">
-    <img src="https://img.shields.io/endpoint?url=https://api.pinstudios.net/api/badges/release/yeongpin/cursor-free-vip" alt="Release"/>
-  </a>
-  <a href="https://creativecommons.org/licenses/by-nc-nd/4.0/">
-    <img src="https://img.shields.io/badge/License-CC_BY--NC--ND_4.0-lightgrey.svg" alt="License"/>
-  </a>
-  <a href="https://github.com/yeongpin/cursor-free-vip/stargazers">
-    <img src="https://img.shields.io/endpoint?url=https://api.pinstudios.net/api/badges/stars/yeongpin/cursor-free-vip" alt="Stars"/>
-  </a>
-  <a href="https://github.com/yeongpin/cursor-free-vip/releases/latest">
-    <img src="https://img.shields.io/endpoint?url=https://api.pinstudios.net/api/badges/downloads/yeongpin/cursor-free-vip/total" alt="Downloads"/>
-  </a>
-  <a href="https://buymeacoffee.com/yeongpin" target="_blank">
-    <img alt="Buy Me a Coffee" src="https://img.shields.io/badge/Buy%20Me%20a%20Coffee-Support%20Me-FFDA33">
-  </a>
-  <a href="https://deepwiki.com/yeongpin/cursor-free-vip" target="_blank">
-    <img src="https://devin.ai/assets/deepwiki-badge.png" alt="Ask DeepWiki.com" height="20"/>
-  </a>
-</p>
-
----
+无限注册白号，永久免费享受 Cursor 官方的 Free Plan 服务。Free plan 仅能使用 AUTO 模型，但功能已足够强大，满足普通用户常规使用。
 
 ## 🖥️ **支持平台**
 
