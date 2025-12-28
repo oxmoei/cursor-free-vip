@@ -12,12 +12,12 @@ NC='\033[0m' # 无色
 print_logo() {
     echo -e "${CYAN}"
     cat << "EOF"
-   ██████╗██╗   ██╗██████╗ ███████╗ ██████╗ ██████╗      ██████╗ ██████╗  ██████╗   
-  ██╔════╝██║   ██║██╔══██╗██╔════╝██╔═══██╗██╔══██╗     ██╔══██╗██╔══██╗██╔═══██╗  
-  ██║     ██║   ██║██████╔╝███████╗██║   ██║██████╔╝     ██████╔╝██████╔╝██║   ██║  
-  ██║     ██║   ██║██╔══██╗╚════██║██║   ██║██╔══██╗     ██╔═══╝ ██╔══██╗██║   ██║  
-  ╚██████╗╚██████╔╝██║  ██║███████║╚██████╔╝██║  ██║     ██║     ██║  ██║╚██████╔╝  
-   ╚═════╝ ╚═════╝ ╚═╝  ╚═╝╚══════╝ ╚═════╝ ╚═╝  ╚═╝     ╚═╝     ╚═╝  ╚═╝ ╚═════╝  
+    ██████╗██╗    ██╗██████╗ ███████╗ ██████╗ ██████╗      ██████╗ ██████╗  ██████╗   
+   ██╔════╝██║    ██║██╔══██╗██╔════╝██╔═══██╗██╔══██╗     ██╔══██╗██╔══██╗██╔═══██╗  
+   ██║     ██║    ██║██████╔╝███████╗██║    ██║██████╔╝     ██████╔╝██████╔╝██║    ██║  
+   ██║     ██║    ██║██╔══██╗╚════██║██║    ██║██╔══██╗     ██╔═══╝ ██╔══██╗██║    ██║  
+   ╚██████╗╚██████╔╝██║   ██║███████║╚██████╔╝██║   ██║     ██║     ██║   ██║╚██████╔╝  
+    ╚═════╝ ╚═════╝ ╚═╝   ╚═╝╚══════╝ ╚═════╝ ╚═╝   ╚═╝     ╚═╝     ╚═╝   ╚═╝ ╚═════╝  
 EOF
     echo -e "${NC}"
 }
@@ -102,20 +102,15 @@ get_downloads_dir() {
     fi
 }
 
-# 获取最新版本
+# --- 修改开始：固定版本号 ---
+# 获取指定版本
 get_latest_version() {
-    echo -e "${CYAN}ℹ️ 正在检查最新版本...${NC}"
-    latest_release=$(curl -s https://github.com/SHANMUGAM070106/cursor-free-vip/releases/latest) || {
-        echo -e "${RED}❌ 无法获取最新版本信息${NC}"
-        exit 1
-    }
-    VERSION=$(echo "$latest_release" | grep -o '"tag_name": ".*"' | cut -d'"' -f4 | tr -d 'v')
-    if [ -z "$VERSION" ]; then
-        echo -e "${RED}❌ 解析 GitHub API 响应中的版本失败:\n${latest_release}"
-        exit 1
-    fi
-    echo -e "${GREEN}✅ 最新版本: ${VERSION}${NC}"
+    # 不再从网络动态获取，直接锁定为 1.11.03
+    VERSION="1.11.03"
+    echo -e "${CYAN}ℹ️ 已锁定目标版本: v${VERSION}${NC}"
+    echo -e "${GREEN}✅ 准备安装版本: ${VERSION}${NC}"
 }
+# --- 修改结束 ---
 
 # 检测系统类型和架构
 OS=""
@@ -144,12 +139,21 @@ detect_os() {
     fi
 }
 
+# 补充缺失的空函数防止报错（因为你的原始脚本里 main 调用了它但没定义）
+setup_autostart() {
+    :
+}
+
 # 安装和下载主程序
 install_cursor_free_vip() {
     local downloads_dir=$(get_downloads_dir)
+    # 此处利用上面固定的 VERSION 变量
     local binary_name="CursorFreeVIP_${VERSION}_${OS}"
     local binary_path="${downloads_dir}/${binary_name}"
+    
+    # 这里的链接结构会自动解析为 /releases/download/v1.11.03/...
     local download_url="https://github.com/SHANMUGAM070106/cursor-free-vip/releases/download/v${VERSION}/${binary_name}"
+    
     if [ -f "${binary_path}" ]; then
         echo -e "${GREEN}✅ 已存在安装文件${NC}"
         echo -e "${CYAN}ℹ️ 路径: ${binary_path}${NC}"
@@ -174,6 +178,7 @@ install_cursor_free_vip() {
     echo -e "${CYAN}ℹ️ 未找到安装文件，开始下载...${NC}"
     echo -e "${CYAN}ℹ️ 下载到 ${downloads_dir}...${NC}"
     echo -e "${CYAN}ℹ️ 下载链接: ${download_url}${NC}"
+    
     if curl --output /dev/null --silent --head --fail "$download_url"; then
         echo -e "${GREEN}✅ 文件存在，开始下载...${NC}"
     else
