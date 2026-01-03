@@ -97,17 +97,12 @@ try {
 }
 
 
-# Get latest version number function
+# Get version number function (锁定版本)
 function Get-LatestVersion {
-    try {
-        $latestRelease = Invoke-RestMethod -Uri "https://api.github.com/repos/yeongpin/cursor-free-vip/releases/latest"
-        return @{
-            Version = $latestRelease.tag_name.TrimStart('v')
-            Assets = $latestRelease.assets
-        }
-    } catch {
-        Write-Styled $_.Exception.Message -Color $Theme.Error -Prefix "Error"
-        throw "Cannot get latest version"
+    $VERSION = "1.11.03"
+    Write-Styled "已锁定目标版本: v$VERSION" -Color $Theme.Primary -Prefix "Version"
+    return @{
+        Version = $VERSION
     }
 }
 
@@ -122,64 +117,49 @@ Write-Host "Created by YeongPin`n" -ForegroundColor $Theme.Info
 
 # Main installation function
 function Install-CursorFreeVIP {
-    Write-Styled "Start downloading Cursor Free VIP" -Color $Theme.Primary -Prefix "Download"
+    Write-Styled "Start downloading Cursor Free VIP (源码模式)" -Color $Theme.Primary -Prefix "Download"
     
     try {
-        # Get latest version
-        Write-Styled "Checking latest version..." -Color $Theme.Primary -Prefix "Update"
+        # Get version
         $releaseInfo = Get-LatestVersion
         $version = $releaseInfo.Version
-        Write-Styled "Found latest version: $version" -Color $Theme.Success -Prefix "Version"
         
-        # Find corresponding resources
-        $asset = $releaseInfo.Assets | Where-Object { $_.name -eq "CursorFreeVIP_${version}_windows.exe" }
-        if (!$asset) {
-            Write-Styled "File not found: CursorFreeVIP_${version}_windows.exe" -Color $Theme.Error -Prefix "Error"
-            Write-Styled "Available files:" -Color $Theme.Warning -Prefix "Info"
-            $releaseInfo.Assets | ForEach-Object {
-                Write-Styled "- $($_.name)" -Color $Theme.Info
-            }
-            throw "Cannot find target file"
-        }
+        # 设置安装目录和下载路径
+        $installDir = Join-Path $env:USERPROFILE ".cursor-vip-src"
+        $zipName = "cursor-free-vip-${version}.zip"
+        $zipPath = Join-Path $env:TEMP $zipName
         
-        # Check if Downloads folder already exists for the corresponding version
-        $DownloadsPath = [Environment]::GetFolderPath("UserProfile") + "\Downloads"
-        $downloadPath = Join-Path $DownloadsPath "CursorFreeVIP_${version}_windows.exe"
+        # 使用官方 releases 页面源码包地址
+        # Releases 页面: https://github.com/SHANMUGAM070106/cursor-free-vip/releases/tag/v${version}
+        $downloadUrl = "https://github.com/SHANMUGAM070106/cursor-free-vip/archive/refs/tags/v${version}.zip"
         
-        if (Test-Path $downloadPath) {
-            Write-Styled "Found existing installation file" -Color $Theme.Success -Prefix "Found"
-            Write-Styled "Location: $downloadPath" -Color $Theme.Info -Prefix "Location"
+        # 检查是否已存在安装目录
+        $existingDir = Get-ChildItem -Path $installDir -Directory -Filter "cursor-free-vip*" -ErrorAction SilentlyContinue | Select-Object -First 1
+        
+        if ($existingDir -and (Test-Path (Join-Path $existingDir.FullName "main.py"))) {
+            Write-Styled "检测到已安装的源码版本" -Color $Theme.Success -Prefix "Found"
+            Write-Styled "位置: $($existingDir.FullName)" -Color $Theme.Info -Prefix "Location"
             
-            # Check if running with administrator privileges
-            $isAdmin = ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
-            
-            if (-not $isAdmin) {
-                Write-Styled "Requesting administrator privileges..." -Color $Theme.Warning -Prefix "Admin"
-                
-                # Create new process with administrator privileges
-                $startInfo = New-Object System.Diagnostics.ProcessStartInfo
-                $startInfo.FileName = $downloadPath
-                $startInfo.UseShellExecute = $true
-                $startInfo.Verb = "runas"
-                
-                try {
-                    [System.Diagnostics.Process]::Start($startInfo)
-                    Write-Styled "Program started with admin privileges" -Color $Theme.Success -Prefix "Launch"
-                    return
-                }
-                catch {
-                    Write-Styled "Failed to start with admin privileges. Starting normally..." -Color $Theme.Warning -Prefix "Warning"
-                    Start-Process $downloadPath
-                    return
-                }
+            # 安装依赖
+            if (Test-Path (Join-Path $existingDir.FullName "requirements.txt")) {
+                Write-Styled "安装项目特定依赖 (requirements.txt)..." -Color $Theme.Primary -Prefix "Dependencies"
+                python -m pip install -r (Join-Path $existingDir.FullName "requirements.txt") --user
             }
             
-            # If already running with administrator privileges, start directly
-            Start-Process $downloadPath
+            # 运行 Python 脚本
+            Write-Styled "正在启动 Cursor Free VIP (源码模式)..." -Color $Theme.Primary -Prefix "Launch"
+            $mainPy = Join-Path $existingDir.FullName "main.py"
+            python $mainPy
             return
         }
         
-        Write-Styled "No existing installation file found, starting download..." -Color $Theme.Primary -Prefix "Download"
+        # 创建安装目录
+        if (-not (Test-Path $installDir)) {
+            New-Item -ItemType Directory -Path $installDir -Force | Out-Null
+        }
+        
+        Write-Styled "正在下载源码包..." -Color $Theme.Primary -Prefix "Download"
+        Write-Styled "下载链接: $downloadUrl" -Color $Theme.Info -Prefix "URL"
         
         # Create WebClient and add progress event
         $webClient = New-Object System.Net.WebClient
@@ -238,18 +218,47 @@ function Install-CursorFreeVIP {
         } | Out-Null
 
         # Start download
-        $webClient.DownloadFileAsync([Uri]$asset.browser_download_url, $downloadPath)
+        $webClient.DownloadFileAsync([Uri]$downloadUrl, $zipPath)
 
         # Wait for download to complete
         while ($webClient.IsBusy) {
             Start-Sleep -Milliseconds 100
         }
         
-        Write-Styled "File location: $downloadPath" -Color $Theme.Info -Prefix "Location"
-        Write-Styled "Starting program..." -Color $Theme.Primary -Prefix "Launch"
+        Write-Styled "下载完成!" -Color $Theme.Success -Prefix "Complete"
+        Write-Styled "正在解压源码..." -Color $Theme.Primary -Prefix "Extract"
         
-        # Run program
-        Start-Process $downloadPath
+        # 解压源码包
+        Expand-Archive -Path $zipPath -DestinationPath $installDir -Force
+        
+        # 查找解压后的实际目录名称
+        $actualDir = Get-ChildItem -Path $installDir -Directory -Filter "cursor-free-vip*" | Select-Object -First 1
+        
+        if ($actualDir) {
+            Write-Styled "解压完成!" -Color $Theme.Success -Prefix "Complete"
+            
+            # 安装项目特定依赖
+            $requirementsPath = Join-Path $actualDir.FullName "requirements.txt"
+            if (Test-Path $requirementsPath) {
+                Write-Styled "安装项目特定依赖 (requirements.txt)..." -Color $Theme.Primary -Prefix "Dependencies"
+                python -m pip install -r $requirementsPath --user
+            } else {
+                Write-Styled "未找到 requirements.txt，假设通用依赖已安装" -Color $Theme.Warning -Prefix "Warning"
+            }
+            
+            # 运行 Python 脚本
+            Write-Styled "正在启动 Cursor Free VIP (源码模式)..." -Color $Theme.Primary -Prefix "Launch"
+            $mainPy = Join-Path $actualDir.FullName "main.py"
+            python $mainPy
+        } else {
+            Write-Styled "解压后找不到目录" -Color $Theme.Error -Prefix "Error"
+            throw "Cannot find extracted directory"
+        }
+        
+        # 清理临时文件
+        if (Test-Path $zipPath) {
+            Remove-Item $zipPath -Force
+        }
     }
     catch {
         Write-Styled $_.Exception.Message -Color $Theme.Error -Prefix "Error"
