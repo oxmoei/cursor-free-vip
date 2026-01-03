@@ -201,7 +201,8 @@ function Install-CursorFreeVIP {
                         "$([math]::Round($speed, 2)) B/s"
                     }
                     
-                    Write-Host ("`rDownloading: $downloadedMB MB / $totalMB MB ($progress" + '%' + ") - $speedDisplay") -NoNewline -ForegroundColor Cyan
+                    $progressText = "$progress%"
+                    Write-Host "`rDownloading: $downloadedMB MB / $totalMB MB ($progressText) - $speedDisplay" -NoNewline -ForegroundColor Cyan
                     
                     # Update last data
                     $Global:lastBytes = $Global:downloadedBytes
