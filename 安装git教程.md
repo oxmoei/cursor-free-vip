@@ -10,7 +10,7 @@ Git 是一个分布式版本控制系统，广泛用于软件开发。本教程�
 - [更新环境变量](#更新环境变量)
 - [配置 Git](#配置-git)
 
-## Windows 安装
+## 🔴Windows 安装
 
 ### 方法一：官方安装包（推荐）
 
@@ -45,7 +45,7 @@ choco install git -y
 $env:PATH += ";C:\Program Files\Git\cmd"
 ```
 
-## macOS 安装
+## 🔴macOS 安装
 
 ### 方法一：使用 Homebrew（推荐）
 
@@ -70,7 +70,7 @@ brew install git
 1. 访问 https://git-scm.com/download/mac
 2. 下载并安装官方安装包
 
-## Linux 安装
+## 🔴Linux 安装
 
 ### Ubuntu/Debian 系统
 
@@ -95,7 +95,7 @@ git --version
 git version 2.40.0
 ```
 
-## 常见问题
+## ❓常见问题
 
 ### 1. 权限问题
 如果在 Linux/macOS 上遇到权限问题，可能需要使用 `sudo`：
