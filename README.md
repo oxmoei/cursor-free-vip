@@ -31,7 +31,7 @@
 
 ---
 
-### 根据系统环境下载并运行脚本
+### 根据系统环境安装并运行脚本
 
 <details open>
 <summary><b>Linux / WSL / macOS 系统</b></summary>（必须已安装 git，如未安装请参考➡️<a href="./安装git教程.md">安装git教程</a>）
@@ -40,7 +40,7 @@
 # 首次安装和运行
 git clone https://github.com/oxmoei/cursor-free-vip.git && cd cursor-free-vip && ./install.sh
 
-# # 以上安装成功后，下次再运行可直接执行以下命令
+# 以上安装成功后，下次再运行可直接执行以下命令
 sudo python3 ~/.cursor-vip-src/cursor-free-vip-1.11.03/main.py
 ```
 </details>
