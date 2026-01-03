@@ -79,7 +79,7 @@ python "$env:USERPROFILE\.cursor-vip-src\cursor-free-vip-1.11.03\main.py"
 </div>
 
 - 4️⃣ 浏览器“无痕模式”访问官网 [https://www.cursor.com/cn](https://www.cursor.com/cn) ，使用临时邮箱进行注册。假如需要手机验证码则使用接码平台。
-- 5️⃣ 打开 **Cursor** 客户端"文件-首选项-Cursor settings"，右键点击 **Sign in** 复制链接，粘贴到你刚才登录cursor的浏览器输入栏，回车，授权登录。
+- 5️⃣ 打开 **Cursor** 客户端"文件-首选项-Cursor settings"，右键点击 **Sign in** 复制链接，粘贴到你刚才登录cursor的浏览器输入栏，回车，弹窗点击 **Yes,Log In**。
 
 <div align="center">
   <img src="login.png" alt="main" width="800" style="border-radius: 8px; margin-top: 10px;"/>
