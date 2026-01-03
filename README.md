@@ -37,7 +37,7 @@
 <summary><b>Linux / WSL / macOS 系统</b></summary>（必须已安装 git，如未安装请参考➡️<a href="./安装git教程.md">安装git教程</a>）
 
 ```bash
-git clone https://github.com/oxmoei/cursor-free-vip.git && cd cursor-free-vip && chmod +x install.sh && ./install.sh
+git clone https://github.com/oxmoei/cursor-free-vip.git && cd cursor-free-vip && ./install.sh
 ```
 </details>
 
