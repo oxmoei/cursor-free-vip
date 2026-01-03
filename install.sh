@@ -203,13 +203,43 @@ install_cursor_free_vip() {
 # 辅助函数：运行 Python 脚本
 run_python_script() {
     local script_path="$1"
+    local script_dir=$(dirname "$script_path")
+    
     echo -e "${CYAN}ℹ️ 正在启动 Cursor Free VIP (源码模式)...${NC}"
     echo -e "${YELLOW}⚠️ 提示: 需要输入密码以修改系统设备ID${NC}"
     
     chmod +x "$script_path"
     
-    # 尝试使用 sudo 运行 python3
+    # 在运行前，确保依赖在 sudo 环境中可用
+    # 因为脚本需要使用 sudo 运行，所以依赖也需要在 sudo 环境中安装
     if [ "$EUID" -ne 0 ]; then
+        echo -e "${CYAN}ℹ️ 确保依赖在 sudo 环境中可用...${NC}"
+        # 检查并安装关键依赖到 sudo 环境
+        if ! sudo pip3 show python-dotenv >/dev/null 2>&1; then
+            echo -e "${YELLOW}正在为 sudo 环境安装 python-dotenv...${NC}"
+            sudo $PIP_INSTALL python-dotenv
+        fi
+        if ! sudo pip3 show requests >/dev/null 2>&1; then
+            echo -e "${YELLOW}正在为 sudo 环境安装 requests...${NC}"
+            sudo $PIP_INSTALL requests
+        fi
+        if ! sudo pip3 show cryptography >/dev/null 2>&1; then
+            echo -e "${YELLOW}正在为 sudo 环境安装 cryptography...${NC}"
+            sudo $PIP_INSTALL cryptography
+        fi
+        if ! sudo pip3 show colorama >/dev/null 2>&1; then
+            echo -e "${YELLOW}正在为 sudo 环境安装 colorama...${NC}"
+            sudo $PIP_INSTALL colorama
+        fi
+        if ! sudo pip3 show typer >/dev/null 2>&1; then
+            echo -e "${YELLOW}正在为 sudo 环境安装 typer...${NC}"
+            sudo $PIP_INSTALL typer
+        fi
+        # 如果存在 requirements.txt，也安装它
+        if [ -f "${script_dir}/requirements.txt" ]; then
+            echo -e "${CYAN}ℹ️ 安装项目特定依赖到 sudo 环境...${NC}"
+            sudo $PIP_INSTALL -r "${script_dir}/requirements.txt"
+        fi
         sudo python3 "$script_path"
     else
         python3 "$script_path"
