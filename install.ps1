@@ -111,7 +111,9 @@ if ($pythonFound) {
         @{Name='cryptography'; Version='42.0.0'},
         @{Name='python-dotenv'; Version='1.0.0'},
         @{Name='colorama'; Version='0.4.6'},
-        @{Name='typer'; Version='0.9.0'}
+        @{Name='typer'; Version='0.9.0'},
+        @{Name='pywin32'; Version='306'},
+        @{Name='pycryptodome'; Version='3.19.0'}
     )
 
     Write-Styled "Checking and installing Python dependencies..." -Color $Theme.Primary -Prefix "Dependencies"
