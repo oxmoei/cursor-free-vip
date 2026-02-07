@@ -73,46 +73,46 @@ install_dependencies
 
 # 设置 pip 安装命令
 if [ "$OS_TYPE" = "Linux" ]; then
-    PIP_INSTALL="pip3 install --break-system-packages"
+    PIP_INSTALL="python3 -m pip install --break-system-packages"
 elif [ "$OS_TYPE" = "Darwin" ]; then
-    PIP_INSTALL="pip3 install --user --break-system-packages"
+    PIP_INSTALL="python3 -m pip install --user --break-system-packages"
 else
-    PIP_INSTALL="pip3 install"
+    PIP_INSTALL="python3 -m pip install"
 fi
 
 echo -e "${CYAN}ℹ️ 正在检查并补全 Python 依赖库...${NC}"
 
 # 1. Requests
-if ! pip3 show requests >/dev/null 2>&1; then
+if ! python3 -m pip show requests >/dev/null 2>&1; then
     echo -e "${YELLOW}正在安装 requests...${NC}"
     $PIP_INSTALL requests
 fi
 
 # 2. Cryptography
-if ! pip3 show cryptography >/dev/null 2>&1; then
+if ! python3 -m pip show cryptography >/dev/null 2>&1; then
     echo -e "${YELLOW}正在安装 cryptography...${NC}"
     $PIP_INSTALL cryptography
 fi
 
 # 3. Colorama (源码版常需)
-if ! pip3 show colorama >/dev/null 2>&1; then
+if ! python3 -m pip show colorama >/dev/null 2>&1; then
     echo -e "${YELLOW}正在安装 colorama...${NC}"
     $PIP_INSTALL colorama
 fi
 
 # 4. Python-Dotenv (修复你遇到的报错)
-if ! pip3 show python-dotenv >/dev/null 2>&1; then
+if ! python3 -m pip show python-dotenv >/dev/null 2>&1; then
     echo -e "${YELLOW}正在安装 python-dotenv...${NC}"
     $PIP_INSTALL python-dotenv
 fi
 
 # 5. Typer (源码版常见依赖，预防性安装)
-if ! pip3 show typer >/dev/null 2>&1; then
+if ! python3 -m pip show typer >/dev/null 2>&1; then
      echo -e "${YELLOW}正在安装 typer...${NC}"
     $PIP_INSTALL typer
 fi
 
-if ! pip3 show pycryptodome >/dev/null 2>&1; then
+if ! python3 -m pip show pycryptodome >/dev/null 2>&1; then
     $PIP_INSTALL pycryptodome
 fi
 
@@ -282,23 +282,23 @@ run_python_script() {
     if [ "$EUID" -ne 0 ]; then
         echo -e "${CYAN}ℹ️ 确保依赖在 sudo 环境中可用...${NC}"
         # 检查并安装关键依赖到 sudo 环境
-        if ! sudo pip3 show python-dotenv >/dev/null 2>&1; then
+        if ! sudo python3 -m pip show python-dotenv >/dev/null 2>&1; then
             echo -e "${YELLOW}正在为 sudo 环境安装 python-dotenv...${NC}"
             sudo $PIP_INSTALL python-dotenv
         fi
-        if ! sudo pip3 show requests >/dev/null 2>&1; then
+        if ! sudo python3 -m pip show requests >/dev/null 2>&1; then
             echo -e "${YELLOW}正在为 sudo 环境安装 requests...${NC}"
             sudo $PIP_INSTALL requests
         fi
-        if ! sudo pip3 show cryptography >/dev/null 2>&1; then
+        if ! sudo python3 -m pip show cryptography >/dev/null 2>&1; then
             echo -e "${YELLOW}正在为 sudo 环境安装 cryptography...${NC}"
             sudo $PIP_INSTALL cryptography
         fi
-        if ! sudo pip3 show colorama >/dev/null 2>&1; then
+        if ! sudo python3 -m pip show colorama >/dev/null 2>&1; then
             echo -e "${YELLOW}正在为 sudo 环境安装 colorama...${NC}"
             sudo $PIP_INSTALL colorama
         fi
-        if ! sudo pip3 show typer >/dev/null 2>&1; then
+        if ! sudo python3 -m pip show typer >/dev/null 2>&1; then
             echo -e "${YELLOW}正在为 sudo 环境安装 typer...${NC}"
             sudo $PIP_INSTALL typer
         fi
