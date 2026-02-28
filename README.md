@@ -52,7 +52,7 @@ sudo python3 ~/.cursor-vip-src/cursor-free-vip-1.11.03/main.py
 
 ```powershell
 # 首次安装和运行
-Set-ExecutionPolicy Bypass -Scope CurrentUser
+Set-ExecutionPolicy Bypass -Scope CurrentUser -Force
 git clone https://github.com/oxmoei/cursor-free-vip.git
 cd cursor-free-vip
 .\install.ps1
