@@ -1,5 +1,5 @@
 # ✨ **Cursor Free VIP 教程**
-无限注册白号，永久免费享受 Cursor 官方的 Free Plan 服务。Free plan 仅能使用 AUTO 模型，但功能已足够强大，满足普通用户常规使用。
+无限注册白号，永久免费享受 Cursor 官方的 Free Plan 服务。Free plan 仅能使用 Agent-Auto 模型，但功能已足够强大，满足普通用户常规使用。
 
 ## 🖥️ **支持平台**
 
